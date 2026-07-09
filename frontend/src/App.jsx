@@ -25,8 +25,8 @@ import SeedPage from './pages/SeedPage'
 import { useEffect, useRef } from 'react'
 import { io } from 'socket.io-client'
 import { setSocket, setShopsInMyCity } from './redux/userSlice'
+export const serverUrl = import.meta.env.VITE_API_URL
 
-export const serverUrl = "http://localhost:8002"
 
 function App() {
   const { userData, currentCity, shopInMyCity } = useSelector(state => state.user)
