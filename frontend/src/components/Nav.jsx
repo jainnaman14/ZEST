@@ -44,9 +44,11 @@ function Nav() {
     const handleLogOut = async () => {
         try {
             await axios.get(`${serverUrl}/api/auth/signout`, { withCredentials: true })
-            dispatch(setUserData(null))
         } catch (error) {
             console.log(error)
+        } finally {
+            localStorage.removeItem("zest_token")
+            dispatch(setUserData(null))
         }
     }
 

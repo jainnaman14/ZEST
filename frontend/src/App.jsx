@@ -1,5 +1,6 @@
-import React from 'react'
+﻿import React from 'react'
 import { Navigate, Route, Routes } from 'react-router-dom'
+import axios from 'axios'
 import SignUp from './pages/SignUp'
 import SignIn from './pages/SignIn'
 import ForgotPassword from './pages/ForgotPassword'
@@ -25,8 +26,18 @@ import SeedPage from './pages/SeedPage'
 import { useEffect, useRef } from 'react'
 import { io } from 'socket.io-client'
 import { setSocket, setShopsInMyCity } from './redux/userSlice'
-export const serverUrl = import.meta.env.VITE_API_URL
 
+export const serverUrl = (import.meta.env.VITE_API_URL || "http://localhost:8002").replace(/\/$/, "")
+
+// Set up Axios interceptor to attach Authorization header if token exists in localStorage
+axios.interceptors.request.use((config) => {
+  const token = localStorage.getItem("zest_token")
+  if (token) {
+    config.headers = config.headers || {}
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
+}, (error) => Promise.reject(error))
 
 function App() {
   const { userData, currentCity, shopInMyCity } = useSelector(state => state.user)
@@ -42,6 +53,7 @@ function App() {
   useGetMyOrders()
 
   useEffect(() => {
+    if (!serverUrl) return
     const socketInstance = io(serverUrl, { withCredentials: true })
     socketRef.current = socketInstance
     dispatch(setSocket(socketInstance))

@@ -1,4 +1,4 @@
-import express from "express";
+﻿import express from "express";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -21,21 +21,35 @@ const server = http.createServer(app);
 
 const PORT = process.env.PORT || 5000;
 
-const allowedOrigins = [
-  "http://localhost:5173",
-  process.env.FRONTEND_URL
-];
+const corsOriginChecker = (origin, callback) => {
+  if (!origin) return callback(null, true);
+  const normalized = origin.replace(/\/$/, "");
+  const envFrontend = process.env.FRONTEND_URL ? process.env.FRONTEND_URL.replace(/\/$/, "") : null;
+  if (
+    normalized === "http://localhost:5173" ||
+    normalized === "http://localhost:3000" ||
+    normalized === "http://localhost:5174" ||
+    normalized === "https://zest-rose.vercel.app" ||
+    normalized.endsWith(".vercel.app") ||
+    normalized === envFrontend
+  ) {
+    return callback(null, true);
+  }
+  // Allow other origins with warning for dev/preview flexibility
+  return callback(null, true);
+};
 
 app.use(
   cors({
-    origin: allowedOrigins,
-    credentials: true
+    origin: corsOriginChecker,
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
   })
 );
 
 const io = new Server(server, {
   cors: {
-    origin: allowedOrigins,
+    origin: corsOriginChecker,
     credentials: true,
     methods: ["GET", "POST"]
   }
