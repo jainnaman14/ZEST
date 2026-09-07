@@ -1,4 +1,5 @@
-﻿import User from "../models/user.model.js"
+﻿import mongoose from "mongoose"
+import User from "../models/user.model.js"
 import bcrypt from "bcryptjs"
 import genToken from "../utils/token.js"
 import { sendOtpMail } from "../utils/mail.js"
@@ -13,8 +14,19 @@ const getCookieOptions = () => {
     };
 };
 
+const checkDb = (res) => {
+    if (mongoose.connection.readyState !== 1) {
+        res.status(503).json({ 
+            message: "Database is not connected. Please check your MongoDB Atlas dashboard and ensure your cluster is active/resumed." 
+        });
+        return false;
+    }
+    return true;
+};
+
 export const signUp = async (req, res) => {
     try {
+        if (!checkDb(res)) return;
         const { fullName, email, password, mobile, role } = req.body
         let user = await User.findOne({ email })
         if (user) {
@@ -50,6 +62,7 @@ export const signUp = async (req, res) => {
 
 export const signIn = async (req, res) => {
     try {
+        if (!checkDb(res)) return;
         const { email, password } = req.body
         const user = await User.findOne({ email })
         if (!user) {
@@ -88,6 +101,7 @@ export const signOut = async (req, res) => {
 
 export const sendOtp = async (req, res) => {
     try {
+        if (!checkDb(res)) return;
         const { email } = req.body
         const user = await User.findOne({ email })
         if (!user) {
@@ -107,6 +121,7 @@ export const sendOtp = async (req, res) => {
 
 export const verifyOtp = async (req, res) => {
     try {
+        if (!checkDb(res)) return;
         const { email, otp } = req.body
         const user = await User.findOne({ email })
         if (!user || user.resetOtp != otp || user.otpExpires < Date.now()) {
@@ -124,6 +139,7 @@ export const verifyOtp = async (req, res) => {
 
 export const resetPassword = async (req, res) => {
     try {
+        if (!checkDb(res)) return;
         const { email, newPassword } = req.body
         const user = await User.findOne({ email })
         if (!user || !user.isOtpVerified) {
@@ -141,6 +157,7 @@ export const resetPassword = async (req, res) => {
 
 export const googleAuth = async (req, res) => {
     try {
+        if (!checkDb(res)) return;
         const { fullName, email, mobile, role } = req.body
         let user = await User.findOne({ email })
         if (!user) {
