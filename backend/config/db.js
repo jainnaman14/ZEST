@@ -1,12 +1,9 @@
-﻿import mongoose from "mongoose"
+﻿import mongoose from "mongoose";
 
 const connectDb = async () => {
     try {
-        if (!process.env.MONGODB_URL) {
-            console.error("MONGODB_URL is not defined in environment variables");
-            return;
-        }
-        await mongoose.connect(process.env.MONGODB_URL, {
+        const mongoUrl = process.env.MONGODB_URL || "mongodb://127.0.0.1:27017/ZEST";
+        await mongoose.connect(mongoUrl, {
             serverSelectionTimeoutMS: 5000,
             socketTimeoutMS: 45000,
             retryWrites: true,
@@ -14,6 +11,7 @@ const connectDb = async () => {
         console.log("Database connected successfully");
     } catch (error) {
         console.error("Database connection error:", error.message);
+        console.warn("Server is running without a database connection. Start MongoDB or fix MONGODB_URL to continue with full app functionality.");
     }
 };
 
